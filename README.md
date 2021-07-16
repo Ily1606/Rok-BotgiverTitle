@@ -14,15 +14,18 @@ Install my-project with git command line
   cd Rok-BotgiverTitle
 ```
 1) Install tesseract.exe in this folder
-2) Install python (I'm using python 3.9 in this project)    
-2) Using bluestack, and in bluestack open Setting->Advanced. Turn on Android debug bridge
-3) Start adb server with command line:
+2) Change tesseract_cmd in file detection.py with path you just installed program in step 1
+3) Install python (I'm using python 3.9 in this project)    
+4) Using bluestack, and in bluestack open Setting->Advanced. Turn on Android debug bridge
+5) Start adb server with command line:
 ```bash
     adb.exe start-server
 ```  
-4) Open Rise Of Kingdom, and broadly chat room.
+6) Open Rise Of Kingdom, and broadly chat room.
     - Because #2116 using 3 rooms for 3 titles (duke, architect, scientist). Current, bot only support duke title, should we need enter in room duke, if not, bot automatic using duke as default.
-5) Run dectection.py with command line (please install python before there)
+    - Please see image below:
+    ![alt text](./docs/demoRoom.png)
+7) Run dectection.py with command line (please install python before there)
 ```bash
     python dectection.py
 ```
