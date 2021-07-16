@@ -14,7 +14,6 @@ pytesseract.tesseract_cmd = "C:/Program Files (x86)/Tesseract-OCR/tesseract.exe"
 def getDataImage(img):
     data = pytesseract.image_to_data(img, lang='eng', config='',output_type='dict')
     return data
-pytesseract.tesseract_cmd = "C:/Program Files (x86)/Tesseract-OCR/tesseract.exe"
 def connect_device():
     adb = Client(host='127.0.0.1',port=5037)
     devices = adb.devices()
@@ -314,6 +313,7 @@ def makeReFresh():
         nonlocal infoCoord
         coord_message_list = (415,45,1140,895)
         img = take_screenshot(device)
+        print("OK")
         sleep(1)
         img = Image.open(io.BytesIO(img))
         leftMessage = img.crop(coord_message_list)
