@@ -26,21 +26,20 @@ def take_screenshot(device):
     return image
 def converImagePilToCV(ImagePIL):
     open_cv_image = np.array(ImagePIL) 
-    # Convert RGB to BGR 
-    #open_cv_image = open_cv_image[:, :, ::-1].copy()
+    open_cv_image = cv.cvtColor(open_cv_image,cv.COLOR_RGB2BGR)
     return open_cv_image
 device = connect_device()
 def clickToTarget(coord):
     device.input_tap(coord[0], coord[1])
     sleep(1)
-def getUserProfile(image,fullimg):
+'''def getUserProfile(image,fullimg):
     img = converImagePilToCV(image)
     data = pytesseract.image_to_data(img, lang='eng', config='--psm 6',output_type='dict')
     if detectIsProFile(data) is True:
         idUser = getIdUser(fullimg)
         userName = getUserName(fullimg)
         #it okay, im ready push it to Queue
-        PushToQueue(idUser,userName)
+        #PushToQueue(idUser,userName)
         return True
     else:
         print("Is not profile user!!!")
@@ -53,7 +52,7 @@ def detectIsProFile(data):
                 result = True
                 break
     return result
-def getIdUser(img):
+    def getIdUser(img):
     coord_channel_Id = (778,230,1000,265)
     idUser = -1
     ImageChannelID = img.crop(coord_channel_Id)
@@ -65,8 +64,8 @@ def getIdUser(img):
         if item != '':
             idUser = int(re.search(r'\d+', item).group())
             break
-    return idUser
-def getUserName(img):
+    return idUser'''
+'''def getUserName(img):
     coord_channel_UserName = (645,262,990,300)
     ImageChannelUserName = img.crop(coord_channel_UserName)
     ImageChannelUserName.show()
@@ -75,17 +74,18 @@ def getUserName(img):
     for item in data["text"]:
         if item != '':
             UserName += item
-    return UserName
-def PushToQueue(id,username):
+    return UserName'''
+'''def PushToQueue(id,username):
     global dukeQueue,coord_channel_close
     dukeQueue = {"id": id,"username": username}
-    device.input_tap(coord_channel_close[0],coord_channel_close[1])
+    device.input_tap(coord_channel_close[0],coord_channel_close[1])'''
 def chat(message):
     coord_chat_bar = [670,875]
     device.input_tap(coord_chat_bar[0],coord_chat_bar[1])
     device.input_text(message)
     device.input_tap(1565,870) #click to send button
     device.input_tap(60,25)
+    print("Bot said: "+message)
     sleep(1)
 def randomCode():
     random_code = ""
@@ -163,6 +163,7 @@ def detectDone():
     coord_message_list = (415,45,1140,895)
     result = False
     while True:
+        print("User done not detect with command in white list!!!")
         img = take_screenshot(device)
         sleep(1)
         current_time = time.time()
@@ -183,15 +184,18 @@ def detectDone():
                         break
                 break
         if result is True:
+            print("User was done!!! Loading next player")
             break
         if current_time - now > time_for_duke:
             chat(" Over time, I'm will load next player!!!")
             break
 def scrollUp():
     device.input_swipe(950,140,950,550, 1000)
+    print("I'm scrolling up!!!")
     sleep(1)
 def scrollDown():
     device.input_swipe(950,550,950,140, 1000)
+    print("I'm scrolling down")
     sleep(1)
 def scrollDownToFindCoord():
     res = ""
@@ -199,12 +203,13 @@ def scrollDownToFindCoord():
     def inside():
         nonlocal res, infoCoord
         global info, lastText
-        coord_message_list = (415,45,1140,895)
+        coord_message_list = (415,45,780,895)
         scrollDown()
         img = take_screenshot(device)
         sleep(1)
         img = Image.open(io.BytesIO(img))
         leftMessage = img.crop(coord_message_list)
+        leftMessage = converImagePilToCV(leftMessage)
         data = getDataImage(leftMessage)
         infoCoords = getCoordList(data)
         print(infoCoords)
@@ -217,6 +222,7 @@ def scrollDownToFindCoord():
             if array_equal(data["text"],lastText):
                 res = "refresh"
     while res == "":
+        print("Not found user want duke!!!")
         inside()
     if res == "action":
         actionTitle(infoCoord)
@@ -228,7 +234,7 @@ def scrollTopToFindCoord(config):
     def inside(config):
         nonlocal res,infoCoord
         global info, lastText
-        coord_message_list = (415,45,1140,895)
+        coord_message_list = (415,45,780,895)
         if config is True:
             scrollUp()
         print(config)
@@ -236,6 +242,7 @@ def scrollTopToFindCoord(config):
         sleep(1)
         img = Image.open(io.BytesIO(img))
         leftMessage = img.crop(coord_message_list)
+        leftMessage = converImagePilToCV(leftMessage)
         data = getDataImage(leftMessage)
         infoCoords = getCoordList(data)
         print(infoCoords)
@@ -244,7 +251,7 @@ def scrollTopToFindCoord(config):
                 if infoCoords[i]["x"] == info["x"] and infoCoords[i]["y"] == info["y"]:
                     if(i == len(infoCoords) - 1): #last_element_in screen
                         lastText = data["text"].copy()
-                        res = "crollDown"
+                        res = "scrollDown"
                     else:
                         infoCoord = infoCoords[i+1].copy()
                         res = "action"
@@ -258,11 +265,11 @@ def scrollTopToFindCoord(config):
         actionTitle(infoCoord)
     elif res == "refresh":
          reFreshFrame()
-    elif res == "crollDown":
+    elif res == "scrollDown":
         scrollDownToFindCoord()
 def actionTitle(infoCoord):
     global info
-    coord_message_list = (415,45,1140,895)
+    coord_message_list = (415,45,780,895)
     coord_target_home = (790,460)
     coord_target_profile_info = (935,305)
     coord_target_title = (945,240)
@@ -276,11 +283,11 @@ def actionTitle(infoCoord):
     if "positionInImg" in info:
         position = (info["left"], info["top"])
     if len(position):
+        print("Found user want duke!!!")
         position = (position[0]+415, position[1] + 50)
         print(position)
         coord_position_avatar = [position[0] - 45, position[1] - 10]
-        print(coord_position_avatar)
-        device.input_tap(position[0] + 10, position[1] + 5)
+        clickToTarget((position[0] + 10, position[1] + 5))
         sleep(5) #wait 5s for loading postion animation
         clickToTarget(coord_target_home)
         sleep(1.5)
@@ -296,7 +303,7 @@ def actionTitle(infoCoord):
         coord_channel_Target = (600,82,990,130) #left top right bottom
         imageChannelTarget = img.crop(coord_channel_Target)'''
         #if getUserProfile(imageChannelTarget,img) is True:
-        device.input_tap(coord_chat_button[0],coord_chat_button[1]) #click to chat button
+        clickToTarget((coord_chat_button[0],coord_chat_button[1])) #click to chat button
         sleep(1)
         device.input_swipe(coord_position_avatar[0],coord_position_avatar[1] , coord_position_avatar[0],coord_position_avatar[1], 2500) #Metion user
         sleep(2.5)
@@ -313,7 +320,6 @@ def makeReFresh():
         nonlocal infoCoord
         coord_message_list = (415,45,1140,895)
         img = take_screenshot(device)
-        print("OK")
         sleep(1)
         img = Image.open(io.BytesIO(img))
         leftMessage = img.crop(coord_message_list)
@@ -327,6 +333,7 @@ def makeReFresh():
         return infoCoord
     while True:
         infoCoord = inside()
+        print("MakeRefresh: Not find user want duke in chat room!!!")
         if "x" in infoCoord:
             break
     actionTitle(infoCoord)    
@@ -336,23 +343,29 @@ def reFreshFrame():
     def inside():
         global info
         nonlocal res,infoCoords
-        coord_message_list = (415,45,1140,895)
+        coord_message_list = (415,45,780,895)
         img = take_screenshot(device)
         sleep(1)
         img = Image.open(io.BytesIO(img))
         leftMessage = img.crop(coord_message_list)
+        leftMessage = converImagePilToCV(leftMessage)
         data = getDataImage(leftMessage)
         infoCoords = getCoordList(data)
         print(infoCoords)
+        founded = False
         if len(infoCoords) >0:
             for i in range(0,len(infoCoords)):
                 if infoCoords[i]["x"] == info["x"] and infoCoords[i]["y"] == info["y"]:
+                    founded = True
                     if(i == len(infoCoords) - 1): #last_element_in screen
                         res = ""
                     else:
                         res = "action"
                         infoCoords = infoCoords[i+1].copy()
+            if founded is False:
+                infoCoords = infoCoords[0].copy()
     while res == "":
+        print("refreshFrame: Not found user want duke in chat room")
         sleep(2)
         inside()
     if res == "action":
@@ -360,8 +373,9 @@ def reFreshFrame():
 coord_left_message = (415,50,760,840)
 coord_channel_close = (1365,105)
 #info = {'left': 77, 'top': 396, 'positionInImg': 39, 'x': 'X:781', 'y': 'Y:508)'}
-#mark_message = "zjjmw"
+#mark_message = "ydzfi"
 lastText = []
+print("Starting...")
 mark_message = randomCode()
 chat("Bot starting with code: "+mark_message)
 info = {}
